@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"log"
-	"os"
 	"os/exec"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 type Video struct {
@@ -15,6 +16,8 @@ type Video struct {
 
 func NewVideoFromAnotherVideo(filename string) (*Video, error) {
     var ret Video
+    ret.Filename = GetFilenameFromURL("output.mp4")
+    log.Printf("Ingesting video: '%s' as '%s'", filename, ret.Filename)
     sizebuf := bytes.NewBuffer([]byte{})
     cmd := exec.Command("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", filename)
     cmd.Stdout = sizebuf
@@ -24,19 +27,19 @@ func NewVideoFromAnotherVideo(filename string) (*Video, error) {
     }
     var length float32
     fmt.Fscan(sizebuf, &length)
-    fmt.Printf("new_video: video length: %ds",int(length))
     ret.Length = int(length)
-    ret.Filename = GetFilenameFromURL("output.mp4")
-    log.Printf("size: %d", int(length))
-    cmd = exec.Command("ffmpeg", "-i", filename, "-lavfi", "[0:v]scale=1920*2:1080*2,boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1[bg];[0:v]scale=-1:1080[ov];[bg][ov]overlay=(W-w)/2:(H-h)/2,crop=w=1920:h=1080", ret.Filename)
-    cmd.Stderr = os.Stderr
-    return &ret, cmd.Run()
+    err = Command("ffmpeg", "-i", filename, "-lavfi", "[0:v]scale=1920*2:1080*2,boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1[bg];[0:v]scale=-1:1080[ov];[bg][ov]overlay=(W-w)/2:(H-h)/2,crop=w=1920:h=1080", ret.Filename)
+    if err != nil {
+        return nil, err
+    }
+    return &ret, nil
 }
 
 func ConcatVideos(videos ...*Video) (*Video, error) {
     var ret Video
     ret.Filename = GetFilenameFromURL("output.mp4")
     ret.Length = 0
+    log.Printf("Concating %d videos as '%s'", len(videos), ret.Filename)
     for _, video := range videos {
         ret.Length += video.Length
     }
@@ -44,12 +47,14 @@ func ConcatVideos(videos ...*Video) (*Video, error) {
     for i := 0; i < len(videos); i++ {
         files[i] = fmt.Sprintf("file '%s'", videos[i].Filename)
     }
+    spew.Dump(files)
     listFile, err := WriteLines(files...)
     if err != nil {
         return nil, err
     }
-    cmd := exec.Command("ffmpeg", "-safe", "0" ,"-f", "concat", "-i", listFile, "-c", "copy", ret.Filename)
-    cmd.Stderr = os.Stderr
-    return &ret, cmd.Run()
+    err = Command("ffmpeg", "-safe", "0" ,"-f", "concat", "-i", listFile, "-c", "copy", ret.Filename)
+    if err != nil {
+        return nil, err
+    }
+    return &ret, nil
 }
-

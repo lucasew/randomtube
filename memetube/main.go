@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"flag"
+	"log"
 	"os"
-	"os/exec"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 var (
@@ -24,25 +26,37 @@ func init() {
     flag.Parse()
 }
 
-func main() {
-    ctx := context.Background()
-    MustBinary("ffmpeg")
+func SetupVideoStream(ctx context.Context) chan(*Video) {
     endpointResult, err := FetchTelegramEndpoint(FETCH_ENDPOINT)
     BailOutIfError(err)
-    videoStream := NewVideoStreamFromTelegramEndpoint(ctx, endpointResult)
-    if maxVideos != 0 {
-        videoStream = VideoStreamLimitByAmount(videoStream, maxVideos)
-    }
-    if maxSeconds != 0 {
-        videoStream = VideoStreamLimitByTotalLength(videoStream, maxSeconds)
-    }
-    downloadedVideos := []*Video{}
-    defer videoStream.Close()
-    for video := range videoStream.Chan() {
+    videos := NewVideoStreamFromTelegramEndpoint(ctx, endpointResult, VideoStreamProps{
+        Seconds: maxSeconds,
+        Amount: maxVideos,
+    })
+    return videos
+}
+
+func GetVideos(ctx context.Context) ([]*Video) {
+    ctx, cancel := context.WithCancel(ctx)
+    defer cancel()
+    videoStream := SetupVideoStream(ctx)
+    downloadedVideos := make([]*Video, 0, 10)
+    for video := range videoStream {
+        spew.Dump(video)
         downloadedVideos = append(downloadedVideos, video)
     }
-    joinedVideo, err := ConcatVideos(downloadedVideos...)
+    spew.Dump(downloadedVideos)
+    return downloadedVideos
+}
+
+func main() {
+    Report("Processo de geração de vídeo iniciado. Limite %ds ou %d videos, 0 é sem limite", maxSeconds, maxVideos)
+    ctx := context.Background()
+    log.Printf("Starting up...")
+    MustBinary("ffmpeg")
+    joinedVideo, err := ConcatVideos(GetVideos(ctx)...)
     BailOutIfError(err)
-    cmd := exec.Command("mv", joinedVideo.Filename, "/tmp/out_memetube.mp4")
-    BailOutIfError(cmd.Run())
+    video, err := PostVideo(ctx, joinedVideo)
+    BailOutIfError(err)
+    Report("Video postado em http://youtu.be/%s", video.Id)
 }

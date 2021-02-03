@@ -2,11 +2,17 @@ package main
 
 import (
 	"context"
+	"log"
 )
 
 type VideoStream struct {
     ch chan(*Video)
     ctx context.Context
+}
+
+type VideoStreamProps struct {
+    Seconds int
+    Amount int
 }
 
 func (s *VideoStream) Chan() <-chan(*Video) {
@@ -18,64 +24,39 @@ func (s *VideoStream) Close() {
     cancel()
 }
 
-func NewVideoStreamFromTelegramEndpoint(ctx context.Context, source *TelegramEndpointData) *VideoStream {
-    var stream VideoStream
-    stream.ch = make(chan(*Video))
-    stream.ctx = ctx
+func NewVideoStreamFromTelegramEndpoint(ctx context.Context, source *TelegramEndpointData, props VideoStreamProps) chan(*Video) {
+    ch := make(chan(*Video))
     go func() {
+        seconds := 0
+        amount := 0
+        defer close(ch)
         videos := source.Videos
         for i := 0; i < len(videos); i++ {
+            seconds += videos[i].Length
+            amount++
+            if seconds > props.Seconds && props.Seconds != 0 {
+                return
+            }
+            if amount > props.Amount && props.Amount != 0 {
+                return
+            }
             video, err := FetchVideoFromTelegram(videos[i].FileID)
-            if err != nil {
-                continue
+            select {
+            case <-ctx.Done():
+                return
+            default:
+                log.Printf("Error when looking for '%s': %s", videos[i].FileID, err)
+                if err != nil {
+                    continue
+                }
             }
             select {
-            case stream.ch <- video:
+            case ch <-video:
                 continue
             case <-ctx.Done():
                 return
             }
         }
     }()
-    return &stream
-}
-
-func VideoStreamLimitByTotalLength(stream *VideoStream, seconds int) *VideoStream {
-    ctx, cancel := context.WithCancel(stream.ctx)
-    var ret VideoStream
-    ret.ch = make(chan(*Video))
-    ret.ctx = ctx
-    go func() {
-        defer cancel()
-        defer close(ret.ch)
-        curLength := 0
-        for video := range stream.Chan() {
-            curLength += video.Length
-            ret.ch <- video
-            if (curLength > seconds) {
-                return
-            }
-        }
-    }()
-    return &ret
-}
-
-func VideoStreamLimitByAmount(stream *VideoStream, amount int) *VideoStream {
-    ctx, cancel := context.WithCancel(stream.ctx)
-    var ret VideoStream
-    ret.ch = make(chan(*Video))
-    ret.ctx = ctx
-    go func() {
-        i := 0
-        defer cancel()
-        defer close(ret.ch)
-        for video := range stream.Chan() {
-            i++
-            ret.ch <- video
-            if (i > amount) {
-                return
-            }
-        }
-    }()
-    return &ret
+    return ch
 }

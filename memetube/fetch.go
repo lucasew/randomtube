@@ -17,6 +17,7 @@ type TelegramEndpointData struct {
 }
 
 func FetchTelegramEndpoint(endpoint string) (*TelegramEndpointData, error) {
+    log.Printf("Fetching video list from endpoint...")
     resp, err := http.Get(fmt.Sprintf("%s/list", endpoint))
     if err != nil {
         return nil, err
@@ -37,7 +38,7 @@ type TelegramFileResult struct {
 }
 
 func FetchVideoFromTelegram(fileId string) (*Video, error) {
-    log.Printf("video_downloader/telegram: Downloading video '%s'", fileId)
+    log.Printf("Downloading telegram video '%s'", fileId)
     resp, err := http.Get(fmt.Sprintf("https://api.telegram.org/bot%s/getFile?file_id=%s", TELEGRAM_BOT, fileId))
     if err != nil {
         return nil, err
@@ -51,7 +52,7 @@ func FetchVideoFromTelegram(fileId string) (*Video, error) {
     videoDownloadUrl := fmt.Sprintf("https://api.telegram.org/file/bot%s/%s", TELEGRAM_BOT, telegramUri)
     video, err := Download(videoDownloadUrl)
     if err != nil {
-        log.Printf("video_downloader/telegram/download_video: %s", err)
+        return nil, err
     }
     return NewVideoFromAnotherVideo(video)
 }

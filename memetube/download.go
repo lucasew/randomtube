@@ -21,7 +21,6 @@ func GetFilenameFromURL(url string) (string) {
     if extension != "" {
         filename += "." + extension
     }
-    log.Printf(filename)
     return filepath.Join(tempdir, filename)
 }
 
@@ -34,6 +33,7 @@ func Download(url string) (path string, err error) {
         return "", err
     }
     resp, err := http.Get(url)
+    log.Printf("Downloading %s (%d bytes)...", filename, resp.ContentLength)
     if err != nil {
         return "", err
     }
