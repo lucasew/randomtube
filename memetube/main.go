@@ -17,6 +17,20 @@ var (
     maxSeconds int
 )
 
+func main() {
+    defer CleanupPhase()
+    Report("Processo de geração de vídeo iniciado. Limite %ds ou %d videos, 0 é sem limite", maxSeconds, maxVideos)
+    ctx, cancel := context.WithCancel(context.Background())
+    AddCleanupHook(cancel)
+    log.Printf("Starting up...")
+    MustBinary("ffmpeg")
+    joinedVideo, err := ConcatVideos(GetVideos(ctx)...)
+    BailOutIfError(err)
+    video, err := PostVideo(ctx, joinedVideo)
+    BailOutIfError(err)
+    Report("Video postado em http://youtu.be/%s", video.Id)
+}
+
 func init() {
     flag.StringVar(&TELEGRAM_BOT, "tg", os.Getenv("TELEGRAM_BOT"), "Telegram bot token")
     flag.StringVar(&FETCH_ENDPOINT, "fe", os.Getenv("FETCH_ENDPOINT"), "Fetch endpoint (pipedream)")
@@ -49,14 +63,3 @@ func GetVideos(ctx context.Context) ([]*Video) {
     return downloadedVideos
 }
 
-func main() {
-    Report("Processo de geração de vídeo iniciado. Limite %ds ou %d videos, 0 é sem limite", maxSeconds, maxVideos)
-    ctx := context.Background()
-    log.Printf("Starting up...")
-    MustBinary("ffmpeg")
-    joinedVideo, err := ConcatVideos(GetVideos(ctx)...)
-    BailOutIfError(err)
-    video, err := PostVideo(ctx, joinedVideo)
-    BailOutIfError(err)
-    Report("Video postado em http://youtu.be/%s", video.Id)
-}

@@ -53,8 +53,6 @@ func GetYoutubeService(ctx context.Context) (*youtube.Service, error) {
     if err != nil {
         return nil, err
     }
-    // 
-    // option.WithCredentialsJSON(token)
     return youtube.NewService(ctx, option.WithTokenSource(oauth2.StaticTokenSource(token)))
 }
 

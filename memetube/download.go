@@ -38,6 +38,7 @@ func Download(url string) (path string, err error) {
         return "", err
     }
     _, err = io.Copy(f, resp.Body)
+    AddFileCleanupHook(filename)
     return filename, err
 }
 

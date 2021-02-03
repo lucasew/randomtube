@@ -35,6 +35,7 @@ func WriteLines(lines ...string) (string, error) {
     for _, file := range lines {
         fmt.Fprintln(f, file)
     }
+    AddFileCleanupHook(filename)
     return filename, nil
 }
 
