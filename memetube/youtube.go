@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 
@@ -57,7 +56,7 @@ func GetYoutubeService(ctx context.Context) (*youtube.Service, error) {
 }
 
 func PostVideo(ctx context.Context, video *Video) (*youtube.Video, error) {
-    log.Printf("Posting '%s' to youtube", video.Filename)
+    Log("Posting '%s' to youtube", video.Filename)
     videoFile, err := os.Open(video.Filename)
     defer videoFile.Close()
     if err != nil {
@@ -82,6 +81,6 @@ func PostVideo(ctx context.Context, video *Video) (*youtube.Video, error) {
     if err != nil {
         return nil, err
     }
-    log.Printf("Video posted successfully on https://youtu.be/%s", ytVideo.Id)
+    Log("Video posted successfully on https://youtu.be/%s", ytVideo.Id)
     return ytVideo, nil
 }

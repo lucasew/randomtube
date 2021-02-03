@@ -15,13 +15,13 @@ import (
 func MustBinary(binary string) {
     _, err := exec.LookPath(binary)
     if err != nil {
-        log.Fatal(err)
+        BailOutIfError(err)
     }
 }
 
 func BailOutIfError(err error) {
     if err != nil {
-        log.Fatal(err)
+        BailOutIfError(err)
     }
 }
 
@@ -40,7 +40,7 @@ func WriteLines(lines ...string) (string, error) {
 }
 
 func Command(binary string, args ...string) error {
-    log.Printf("Run command: %s %s", binary, args)
+    Log("Run command: %s %s", binary, args)
     cmd := exec.Command(binary, args...)
     cmd.Stderr = os.Stderr
     return cmd.Run()
@@ -80,4 +80,8 @@ func Report(message string, format ...interface{}) error {
     }
     _, err = http.DefaultClient.Do(&req)
     return err
+}
+
+func Log(message string, format ...interface{}) {
+    log.Printf(message, format...)
 }

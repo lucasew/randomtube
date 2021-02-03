@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"sync"
 
@@ -21,7 +20,7 @@ func AddCleanupHook(f func()) string {
 
 func AddFileCleanupHook(filename string) string {
     return AddCleanupHook(func() {
-        log.Printf("cleanup: Deleting file %s", filename)
+        Log("cleanup: Deleting file %s", filename)
         os.Remove(filename)
     })
 }
@@ -29,7 +28,7 @@ func AddFileCleanupHook(filename string) string {
 func CleanupPhase() {
     cleanupHooksLock.Lock()
     defer cleanupHooksLock.Unlock()
-    log.Printf("Starting cleanup phase with %d items", len(cleanupHooks))
+    Log("Starting cleanup phase with %d items", len(cleanupHooks))
     for _, step := range cleanupHooks {
         step()
     }

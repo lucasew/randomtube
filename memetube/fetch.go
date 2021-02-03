@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
     "strings"
@@ -20,7 +19,7 @@ type TelegramEndpointData struct {
 }
 
 func FetchTelegramEndpoint(endpoint string) (*TelegramEndpointData, error) {
-    log.Printf("Fetching video list from endpoint...")
+    Log("Fetching video list from endpoint...")
     resp, err := http.Get(fmt.Sprintf("%s/list", endpoint))
     if err != nil {
         return nil, err
@@ -44,7 +43,7 @@ var ProcessedFileIDs = []string{}
 
 func MarkTelegramVideosAsProcessedCleanupHook() {
     AddCleanupHook(func() {
-        log.Printf("cleanup: mark processed videos as processed")
+        Log("cleanup: mark processed videos as processed")
         payload := struct {
             Files []string `json:"files"`
         }{
@@ -54,7 +53,7 @@ func MarkTelegramVideosAsProcessedCleanupHook() {
         json.NewEncoder(buf).Encode(payload)
         u, err := url.Parse(fmt.Sprintf("%s/deleteIds", FETCH_ENDPOINT))
         if err != nil {
-            log.Printf("mark_processed: %s", err)
+            Log("mark_processed: %s", err)
             return
         }
         req := http.Request{
@@ -65,13 +64,13 @@ func MarkTelegramVideosAsProcessedCleanupHook() {
         _, err = http.DefaultClient.Do(&req)
         if err != nil {
             Report("Não foi possível marcar os vídeos processados como processados, intervenção manual requerida: %s\nVídeos processados:\n%s", err, strings.Join(ProcessedFileIDs, "\n"))
-            log.Printf("mark_processed: %s", err)
+            Log("mark_processed: %s", err)
         }
     })
 }
 
 func FetchVideoFromTelegram(fileId string) (*Video, error) {
-    log.Printf("Downloading telegram video '%s'", fileId)
+    Log("Downloading telegram video '%s'", fileId)
     resp, err := http.Get(fmt.Sprintf("https://api.telegram.org/bot%s/getFile?file_id=%s", TELEGRAM_BOT, fileId))
     if err != nil {
         return nil, err

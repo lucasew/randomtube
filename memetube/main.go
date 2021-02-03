@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"log"
 	"os"
 )
 
@@ -20,7 +19,7 @@ func main() {
     Report("Processo de geração de vídeo iniciado. Limite %ds ou %d videos, 0 é sem limite", maxSeconds, maxVideos)
     ctx, cancel := context.WithCancel(context.Background())
     AddCleanupHook(cancel)
-    log.Printf("Starting up...")
+    Log("Starting up...")
     MustBinary("ffmpeg")
     joinedVideo, err := ConcatVideos(GetVideos(ctx)...)
     BailOutIfError(err)

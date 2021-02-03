@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 )
 
 type VideoStream struct {
@@ -45,7 +44,7 @@ func NewVideoStreamFromTelegramEndpoint(ctx context.Context, source *TelegramEnd
             case <-ctx.Done():
                 return
             default:
-                log.Printf("Error when looking for '%s': %s", videos[i].FileID, err)
+                Log("Error when looking for '%s': %s", videos[i].FileID, err)
                 if err != nil {
                     continue
                 }

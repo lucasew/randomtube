@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os/exec"
 )
 
@@ -15,7 +14,7 @@ type Video struct {
 func NewVideoFromAnotherVideo(filename string) (*Video, error) {
     var ret Video
     ret.Filename = GetFilenameFromURL("output.mp4")
-    log.Printf("Ingesting video: '%s' as '%s'", filename, ret.Filename)
+    Log("Ingesting video: '%s' as '%s'", filename, ret.Filename)
     sizebuf := bytes.NewBuffer([]byte{})
     cmd := exec.Command("ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", filename)
     cmd.Stdout = sizebuf
@@ -38,7 +37,7 @@ func ConcatVideos(videos ...*Video) (*Video, error) {
     var ret Video
     ret.Filename = GetFilenameFromURL("output.mp4")
     ret.Length = 0
-    log.Printf("Concating %d videos as '%s'", len(videos), ret.Filename)
+    Log("Concating %d videos as '%s'", len(videos), ret.Filename)
     for _, video := range videos {
         ret.Length += video.Length
     }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -33,7 +32,7 @@ func Download(url string) (path string, err error) {
         return "", err
     }
     resp, err := http.Get(url)
-    log.Printf("Downloading %s (%d bytes)...", filename, resp.ContentLength)
+    Log("Downloading %s (%d bytes)...", filename, resp.ContentLength)
     if err != nil {
         return "", err
     }
