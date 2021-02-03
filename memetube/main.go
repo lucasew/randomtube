@@ -5,8 +5,6 @@ import (
 	"flag"
 	"log"
 	"os"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 var (
@@ -28,6 +26,7 @@ func main() {
     BailOutIfError(err)
     video, err := PostVideo(ctx, joinedVideo)
     BailOutIfError(err)
+    MarkTelegramVideosAsProcessedCleanupHook()
     Report("Video postado em http://youtu.be/%s", video.Id)
 }
 
@@ -56,10 +55,8 @@ func GetVideos(ctx context.Context) ([]*Video) {
     videoStream := SetupVideoStream(ctx)
     downloadedVideos := make([]*Video, 0, 10)
     for video := range videoStream {
-        spew.Dump(video)
         downloadedVideos = append(downloadedVideos, video)
     }
-    spew.Dump(downloadedVideos)
     return downloadedVideos
 }
 

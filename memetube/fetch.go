@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
+    "strings"
 )
 
 type TelegramVideo struct {
@@ -37,6 +40,36 @@ type TelegramFileResult struct {
     Result ResultData `json:"result"`
 }
 
+var ProcessedFileIDs = []string{}
+
+func MarkTelegramVideosAsProcessedCleanupHook() {
+    AddCleanupHook(func() {
+        log.Printf("cleanup: mark processed videos as processed")
+        payload := struct {
+            Files []string `json:"files"`
+        }{
+            Files: ProcessedFileIDs,
+        }
+        buf := bytes.NewBufferString("")
+        json.NewEncoder(buf).Encode(payload)
+        u, err := url.Parse(fmt.Sprintf("%s/deleteIds", FETCH_ENDPOINT))
+        if err != nil {
+            log.Printf("mark_processed: %s", err)
+            return
+        }
+        req := http.Request{
+            Method: http.MethodGet,
+            URL: u,
+            Body: NewReadCloserWrapper(buf),
+        }
+        _, err = http.DefaultClient.Do(&req)
+        if err != nil {
+            Report("Não foi possível marcar os vídeos processados como processados, intervenção manual requerida: %s\nVídeos processados:\n%s", err, strings.Join(ProcessedFileIDs, "\n"))
+            log.Printf("mark_processed: %s", err)
+        }
+    })
+}
+
 func FetchVideoFromTelegram(fileId string) (*Video, error) {
     log.Printf("Downloading telegram video '%s'", fileId)
     resp, err := http.Get(fmt.Sprintf("https://api.telegram.org/bot%s/getFile?file_id=%s", TELEGRAM_BOT, fileId))
@@ -54,5 +87,10 @@ func FetchVideoFromTelegram(fileId string) (*Video, error) {
     if err != nil {
         return nil, err
     }
-    return NewVideoFromAnotherVideo(video)
+    videoFile, err := NewVideoFromAnotherVideo(video)
+    if err != nil {
+        return nil, err
+    }
+    ProcessedFileIDs = append(ProcessedFileIDs, fileId)
+    return videoFile, nil
 }

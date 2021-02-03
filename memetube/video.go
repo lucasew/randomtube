@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 type Video struct {
@@ -48,7 +46,6 @@ func ConcatVideos(videos ...*Video) (*Video, error) {
     for i := 0; i < len(videos); i++ {
         files[i] = fmt.Sprintf("file '%s'", videos[i].Filename)
     }
-    spew.Dump(files)
     listFile, err := WriteLines(files...)
     if err != nil {
         return nil, err
