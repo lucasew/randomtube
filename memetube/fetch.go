@@ -43,6 +43,10 @@ var ProcessedFileIDs = []string{}
 
 func MarkTelegramVideosAsProcessedCleanupHook() {
     AddCleanupHook(func() {
+        if (dontMarkVideosAsProcessed) {
+            Log("warning: skipping mark processed videos as processed")
+            return
+        }
         Log("cleanup: mark processed videos as processed")
         payload := struct {
             Files []string `json:"files"`
