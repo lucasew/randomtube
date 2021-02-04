@@ -71,8 +71,12 @@ func Report(message string, format ...interface{}) {
         URL: u,
         Body: NewReadCloserWrapper(buf),
     }
-    _, err = http.DefaultClient.Do(&req)
+    res, err := http.DefaultClient.Do(&req)
     BailOutIfError(err)
+    if res.StatusCode != 200 {
+        BailOutIfError(fmt.Errorf("Report returned status %d", res.StatusCode))
+    }
+    Log("Report sent!")
 }
 
 func Log(message string, format ...interface{}) {
