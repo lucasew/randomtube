@@ -79,6 +79,9 @@ func Report(message string, format ...interface{}) error {
         Body: NewReadCloserWrapper(buf),
     }
     _, err = http.DefaultClient.Do(&req)
+    if err != nil {
+        log.Printf("Failed to report data upstream: %s", err)
+    }
     return err
 }
 
