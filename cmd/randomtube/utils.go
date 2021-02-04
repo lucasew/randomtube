@@ -74,6 +74,7 @@ func Report(message string, format ...interface{}) {
     res, err := http.DefaultClient.Do(&req)
     BailOutIfError(err)
     if res.StatusCode != 200 {
+        io.Copy(os.Stdout, res.Body)
         BailOutIfError(fmt.Errorf("Report returned status %d", res.StatusCode))
     }
     Log("Report sent!")
