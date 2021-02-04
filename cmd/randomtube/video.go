@@ -25,7 +25,11 @@ func NewVideoFromAnotherVideo(filename string) (*Video, error) {
     var length float32
     fmt.Fscan(sizebuf, &length)
     ret.Length = int(length)
-    err = Command("ffmpeg", "-i", filename, "-lavfi", "[0:v]scale=1920*2:1080*2,boxblur=luma_radius=min(h\\,w)/20:luma_power=1:chroma_radius=min(cw\\,ch)/20:chroma_power=1[bg];[0:v]scale=-1:1080[ov];[bg][ov]overlay=(W-w)/2:(H-h)/2,crop=w=1920:h=1080", ret.Filename)
+    err = Command("ffmpeg", "-i", filename, "-filter_complex", `
+[0:v]scale=1920*2:-1,crop=1920:1080,boxblur=luma_radius=min(h\,w)/20:luma_power=1:chroma_radius=min(cw\,ch)/20:chroma_power=1[bg];
+[0:v]scale=-1:1080[ov];
+[bg][ov]overlay=(W-w)/2,crop=1920:1080
+    `, ret.Filename)
     AddFileCleanupHook(ret.Filename)
     if err != nil {
         return nil, err

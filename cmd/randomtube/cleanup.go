@@ -26,6 +26,9 @@ func AddFileCleanupHook(filename string) string {
 }
 
 func CleanupPhase() {
+    if dontCleanup {
+        return
+    }
     cleanupHooksLock.Lock()
     defer cleanupHooksLock.Unlock()
     Log("Starting cleanup phase with %d items", len(cleanupHooks))

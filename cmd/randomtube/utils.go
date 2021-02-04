@@ -14,9 +14,7 @@ import (
 
 func MustBinary(binary string) {
     _, err := exec.LookPath(binary)
-    if err != nil {
-        BailOutIfError(err)
-    }
+    BailOutIfError(err)
 }
 
 func BailOutIfError(err error) {

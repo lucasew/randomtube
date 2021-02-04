@@ -13,6 +13,7 @@ var (
     maxVideos int
     maxSeconds int
     dontMarkVideosAsProcessed bool
+    dontCleanup bool
 )
 
 func main() {
@@ -37,6 +38,7 @@ func init() {
     flag.IntVar(&maxVideos, "mv", 0, "Max number of videos in a bundle")
     flag.IntVar(&maxSeconds, "ms", 0, "Stop adding videos when their lengths pass x seconds")
     flag.BoolVar(&dontMarkVideosAsProcessed, "dp", false, "Don't delete processed videos from the queue")
+    flag.BoolVar(&dontCleanup, "dc", false, "Don't cleanup processed artifacts")
     flag.Parse()
 }
 

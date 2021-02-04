@@ -44,8 +44,8 @@ func NewVideoStreamFromTelegramEndpoint(ctx context.Context, source *TelegramEnd
             case <-ctx.Done():
                 return
             default:
-                Log("Error when looking for '%s': %s", videos[i].FileID, err)
                 if err != nil {
+                    Log("Error when looking for '%s': %s", videos[i].FileID, err)
                     continue
                 }
             }
