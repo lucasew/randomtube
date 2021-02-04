@@ -14,16 +14,27 @@ var (
     maxSeconds int
     dontMarkVideosAsProcessed bool
     dontCleanup bool
+    reportChat int64
 )
 
 func main() {
-    defer CleanupPhase()
+    Log("Starting up...")
+    endpointResult, err := FetchTelegramEndpoint()
+    BailOutIfError(err)
     Report("Processo de geração de vídeo iniciado. Limite %ds ou %d videos, 0 é sem limite", maxSeconds, maxVideos)
+    defer CleanupPhase()
     ctx, cancel := context.WithCancel(context.Background())
     AddCleanupHook(cancel)
-    Log("Starting up...")
+
+    downloadedVideos := make([]*Video, 0, 10)
+    for video := range NewVideoStreamFromTelegramEndpoint(ctx, endpointResult, VideoStreamProps{
+        Seconds: maxSeconds,
+        Amount: maxVideos,
+    }) {
+        downloadedVideos = append(downloadedVideos, video)
+    }
     MustBinary("ffmpeg")
-    joinedVideo, err := ConcatVideos(GetVideos(ctx)...)
+    joinedVideo, err := ConcatVideos(downloadedVideos...)
     BailOutIfError(err)
     video, err := PostVideo(ctx, joinedVideo)
     BailOutIfError(err)
@@ -40,26 +51,5 @@ func init() {
     flag.BoolVar(&dontMarkVideosAsProcessed, "dp", false, "Don't delete processed videos from the queue")
     flag.BoolVar(&dontCleanup, "dc", false, "Don't cleanup processed artifacts")
     flag.Parse()
-}
-
-func SetupVideoStream(ctx context.Context) chan(*Video) {
-    endpointResult, err := FetchTelegramEndpoint()
-    BailOutIfError(err)
-    videos := NewVideoStreamFromTelegramEndpoint(ctx, endpointResult, VideoStreamProps{
-        Seconds: maxSeconds,
-        Amount: maxVideos,
-    })
-    return videos
-}
-
-func GetVideos(ctx context.Context) ([]*Video) {
-    ctx, cancel := context.WithCancel(ctx)
-    defer cancel()
-    videoStream := SetupVideoStream(ctx)
-    downloadedVideos := make([]*Video, 0, 10)
-    for video := range videoStream {
-        downloadedVideos = append(downloadedVideos, video)
-    }
-    return downloadedVideos
 }
 

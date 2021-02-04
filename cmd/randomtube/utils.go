@@ -58,18 +58,23 @@ func NewReadCloserWrapper(w io.Reader) io.ReadCloser {
 
 func Report(message string, format ...interface{}) {
     text := struct{
-        Message string `json:"messsage"`
+        ChatID int64 `json:"chat_id"`
+        Message string `json:"text"`
     }{
         Message: fmt.Sprintf(message, format...),
+        ChatID: reportChat,
     }
     buf := bytes.NewBufferString("")
     BailOutIfError(json.NewEncoder(buf).Encode(text))
-    u, err := url.Parse(fmt.Sprintf("%s/notify", FETCH_ENDPOINT))
+    u, err := url.Parse(fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", TELEGRAM_BOT))
     BailOutIfError(err)
     req := http.Request{
         Method: http.MethodGet,
         URL: u,
         Body: NewReadCloserWrapper(buf),
+        Header: http.Header{
+            "Content-Type": []string{"application/json"},
+        },
     }
     res, err := http.DefaultClient.Do(&req)
     BailOutIfError(err)
