@@ -67,10 +67,7 @@ func Report(message string, format ...interface{}) error {
     if err != nil {
         return err
     }
-    u, err := url.Parse(fmt.Sprintf("%s/notify", FETCH_ENDPOINT))
-    if err != nil {
-        return err
-    }
+    u, _ := url.Parse(fmt.Sprintf("%s/notify", FETCH_ENDPOINT))
     req := http.Request{
         Method: http.MethodGet,
         URL: u,
