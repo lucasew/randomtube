@@ -18,9 +18,9 @@ type TelegramEndpointData struct {
     Videos []TelegramVideo `json:"videos"`
 }
 
-func FetchTelegramEndpoint(endpoint string) (*TelegramEndpointData, error) {
+func FetchTelegramEndpoint() (*TelegramEndpointData, error) {
     Log("Fetching video list from endpoint...")
-    resp, err := http.Get(fmt.Sprintf("%s/list", endpoint))
+    resp, err := http.Get(fmt.Sprintf("%s/list", FETCH_ENDPOINT))
     if err != nil {
         return nil, err
     }

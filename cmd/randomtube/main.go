@@ -43,7 +43,7 @@ func init() {
 }
 
 func SetupVideoStream(ctx context.Context) chan(*Video) {
-    endpointResult, err := FetchTelegramEndpoint(FETCH_ENDPOINT)
+    endpointResult, err := FetchTelegramEndpoint()
     BailOutIfError(err)
     videos := NewVideoStreamFromTelegramEndpoint(ctx, endpointResult, VideoStreamProps{
         Seconds: maxSeconds,
