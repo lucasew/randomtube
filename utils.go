@@ -21,7 +21,7 @@ func MustBinary(binary string) {
 
 func BailOutIfError(err error) {
     if err != nil {
-        BailOutIfError(err)
+        log.Fatal(err)
     }
 }
 
