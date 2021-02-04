@@ -56,28 +56,23 @@ func NewReadCloserWrapper(w io.Reader) io.ReadCloser {
 }
 
 
-func Report(message string, format ...interface{}) error {
+func Report(message string, format ...interface{}) {
     text := struct{
         Message string `json:"messsage"`
     }{
         Message: fmt.Sprintf(message, format...),
     }
     buf := bytes.NewBufferString("")
-    err := json.NewEncoder(buf).Encode(text)
-    if err != nil {
-        return err
-    }
-    u, _ := url.Parse(fmt.Sprintf("%s/notify", FETCH_ENDPOINT))
+    BailOutIfError(json.NewEncoder(buf).Encode(text))
+    u, err := url.Parse(fmt.Sprintf("%s/notify", FETCH_ENDPOINT))
+    BailOutIfError(err)
     req := http.Request{
         Method: http.MethodGet,
         URL: u,
         Body: NewReadCloserWrapper(buf),
     }
     _, err = http.DefaultClient.Do(&req)
-    if err != nil {
-        log.Printf("Failed to report data upstream: %s", err)
-    }
-    return err
+    BailOutIfError(err)
 }
 
 func Log(message string, format ...interface{}) {
