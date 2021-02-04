@@ -15,6 +15,7 @@ var (
     dontMarkVideosAsProcessed bool
     dontCleanup bool
     reportChat int64
+    youtubePrivacyStatus string
 )
 
 func main() {
@@ -46,6 +47,7 @@ func init() {
     flag.StringVar(&TELEGRAM_BOT, "tg", os.Getenv("TELEGRAM_BOT"), "Telegram bot token")
     flag.StringVar(&FETCH_ENDPOINT, "fe", os.Getenv("FETCH_ENDPOINT"), "Fetch endpoint (pipedream)")
     flag.StringVar(&tempdir, "tmp", os.TempDir(), "Temporary folder for file processing")
+    flag.StringVar(&youtubePrivacyStatus, "ps", "public", "Youtube video privacy status, can be public, unlisted or private")
     flag.IntVar(&maxVideos, "mv", 0, "Max number of videos in a bundle")
     flag.IntVar(&maxSeconds, "ms", 0, "Stop adding videos when their lengths pass x seconds")
     flag.BoolVar(&dontMarkVideosAsProcessed, "dp", false, "Don't delete processed videos from the queue")

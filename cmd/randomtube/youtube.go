@@ -71,7 +71,7 @@ func PostVideo(ctx context.Context, video *Video) (*youtube.Video, error) {
             Title: "Random video compilation",
             Description: "Random videos found across the internet",
         },
-        Status: &youtube.VideoStatus{PrivacyStatus: "unlisted"},
+        Status: &youtube.VideoStatus{PrivacyStatus: youtubePrivacyStatus},
     }
     ytVideo, err = service.Videos.
         Insert([]string{"snippet,status"}, ytVideo).
