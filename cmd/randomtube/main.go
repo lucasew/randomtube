@@ -27,8 +27,8 @@ func main() {
     BailOutIfError(err)
     video, err := PostVideo(ctx, joinedVideo)
     BailOutIfError(err)
-    MarkTelegramVideosAsProcessedCleanupHook()
     Report("Video postado em http://youtu.be/%s", video.Id)
+    MarkTelegramVideosAsProcessedCleanupHook()
 }
 
 func init() {
