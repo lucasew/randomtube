@@ -34,7 +34,9 @@ func NewVideoStreamFromTelegramEndpoint(ctx context.Context, source *TelegramEnd
             seconds += videos[i].Length
             amount++
             if seconds > props.Seconds && props.Seconds != 0 {
-                return
+                if amount > 1 {
+                    return
+                }
             }
             if amount > props.Amount && props.Amount != 0 {
                 return
