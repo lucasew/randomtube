@@ -19,6 +19,7 @@ func MustBinary(binary string) {
 
 func BailOutIfError(err error) {
     if err != nil {
+        Report("Execução abortada: %s", err.Error())
         log.Fatal(err)
     }
 }
