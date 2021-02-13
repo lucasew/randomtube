@@ -11,15 +11,23 @@ import (
 )
 
 func GetFilenameFromURL(url string) (string) {
-    parts := strings.Split(url, ".")
+    urlPart := ""
+    if len(url) < 10 {
+        urlPart = url
+    } else {
+        urlPart = url[len(url) - 10:]
+    }
+    parts := strings.Split(urlPart, ".")
     extension := ""
     if len(parts) > 1 {
         extension = parts[len(parts) - 1]
     }
     filename := uuid.New().String()
-    if extension != "" {
-        filename += "." + extension
+    if extension == "" {
+        extension = "mp4"
     }
+    filename += "."
+    filename += extension
     return filepath.Join(tempdir, filename)
 }
 
