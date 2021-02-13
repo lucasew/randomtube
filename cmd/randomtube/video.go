@@ -25,7 +25,7 @@ func NewVideoFromAnotherVideo(filename string) (*Video, error) {
     var length float32
     fmt.Fscan(sizebuf, &length)
     ret.Length = int(length)
-    err = Command("ffmpeg", "-i", filename, "-filter_complex", `
+    err = Command("ffmpeg", "-i", filename, "-acodec", "mp3" , "-filter_complex", `
 [0:v]scale=1920*2:-1,crop=1920:1080,boxblur=luma_radius=min(h\,w)/20:luma_power=1:chroma_radius=min(cw\,ch)/20:chroma_power=1[bg];
 [0:v]scale=-1:1080[ov];
 [bg][ov]overlay=(W-w)/2,crop=1920:1080,fps=30
