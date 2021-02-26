@@ -70,7 +70,7 @@ func MarkTelegramVideosAsProcessedCleanupHook() {
         res, err := http.DefaultClient.Do(&req)
         if err != nil || res.StatusCode != 200 {
             Report("Não foi possível marcar os vídeos processados como processados: err=%s statusCode=%d.\nClique no link para resolver: %s/deleteIds?ids=%s", err, res.StatusCode, FETCH_ENDPOINT, strings.Join(ProcessedFileIDs, ","))
-            Log("mark_processed: %s", err)
+            Log("mark_processed: %s. status_code: %d", err, res.StatusCode)
         }
     })
 }
