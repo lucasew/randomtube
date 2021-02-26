@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 
 	"golang.org/x/oauth2"
 	"google.golang.org/api/option"
@@ -73,13 +74,20 @@ func PostVideo(ctx context.Context, video *Video) (*youtube.Video, error) {
         },
         Status: &youtube.VideoStatus{PrivacyStatus: youtubePrivacyStatus},
     }
-    ytVideo, err = service.Videos.
+    request := service.Videos.
         Insert([]string{"snippet,status"}, ytVideo).
         NotifySubscribers(true).
-        Context(ctx).Media(videoFile).
-        Do()
-    if err != nil {
-        return nil, err
+        Context(ctx).Media(videoFile)
+    ytVideo, err = request.Do()
+    for {
+        if err != nil {
+            Report("Youtube request failed: %s", err)
+            time.Sleep(10*time.Second)
+            Report("Retrying...")
+            ytVideo, err = request.Do()
+        } else {
+            break
+        }
     }
     Log("Video posted successfully on https://youtu.be/%s", ytVideo.Id)
     return ytVideo, nil
