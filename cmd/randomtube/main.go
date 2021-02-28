@@ -14,6 +14,7 @@ var (
     maxSeconds int
     dontMarkVideosAsProcessed bool
     dontCleanup bool
+    dontPost bool
     reportChat int64
     youtubePrivacyStatus string
 )
@@ -39,10 +40,15 @@ func main() {
     MustBinary("ffmpeg")
     joinedVideo, err := ConcatVideos(downloadedVideos...)
     BailOutIfError(err)
-    video, err := PostVideo(ctx, joinedVideo)
-    BailOutIfError(err)
-    Report("Video postado em http://youtu.be/%s", video.Id)
-    MarkTelegramVideosAsProcessedCleanupHook()
+    Log("Generated video: %s", joinedVideo.Filename)
+    if (!dontPost) {
+        video, err := PostVideo(ctx, joinedVideo)
+        BailOutIfError(err)
+        Report("Video postado em http://youtu.be/%s", video.Id)
+        MarkTelegramVideosAsProcessedCleanupHook()
+    } else {
+        Report("Vídeo configurado para não ser postado")
+    }
 }
 
 func init() {
@@ -52,8 +58,9 @@ func init() {
     flag.StringVar(&youtubePrivacyStatus, "ps", "public", "Youtube video privacy status, can be public, unlisted or private")
     flag.IntVar(&maxVideos, "mv", 0, "Max number of videos in a bundle")
     flag.IntVar(&maxSeconds, "ms", 0, "Stop adding videos when their lengths pass x seconds")
-    flag.BoolVar(&dontMarkVideosAsProcessed, "dp", false, "Don't delete processed videos from the queue")
+    flag.BoolVar(&dontMarkVideosAsProcessed, "dd", false, "Don't delete processed videos from the queue")
     flag.BoolVar(&dontCleanup, "dc", false, "Don't cleanup processed artifacts")
+    flag.BoolVar(&dontPost, "dp", false, "Don't post the video, implies dd")
     flag.Parse()
 }
 
