@@ -34,7 +34,7 @@ func NewVideoFromAnotherVideo(filename string) (*Video, error) {
     ret.Length = int(length)
     err = Command("ffmpeg", "-i", filename,
         "-t", fmt.Sprintf("%d", ret.Length),
-        // "-c:a", "aac", "-c:v", "h264",
+        "-c:a", "aac", "-c:v", "h264",
         "-filter_complex", ffmpegFilter,
         "-map", "[composed]",
         "-map", "0:a?",
