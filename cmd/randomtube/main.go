@@ -41,6 +41,7 @@ func main() {
     joinedVideo, err := ConcatVideos(downloadedVideos...)
     BailOutIfError(err)
     Log("Generated video: %s", joinedVideo.Filename)
+    Command("ffprobe", joinedVideo.Filename)
     if (!dontPost) {
         video, err := PostVideo(ctx, joinedVideo)
         BailOutIfError(err)
