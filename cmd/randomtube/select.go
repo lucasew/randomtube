@@ -31,16 +31,14 @@ func NewVideoStreamFromTelegramEndpoint(ctx context.Context, source *TelegramEnd
         defer close(ch)
         videos := source.Videos
         for i := 0; i < len(videos); i++ {
-            seconds += videos[i].Length
-            amount++
-            if seconds > props.Seconds && props.Seconds != 0 {
-                if amount > 1 {
-                    return
-                }
-            }
-            if amount > props.Amount && props.Amount != 0 {
+            if amount > props.Amount && props.Amount > 0 {
                 return
             }
+            if seconds > props.Seconds && props.Seconds > 0 {
+                return
+            }
+            seconds += videos[i].Length
+            amount++
             video, err := FetchVideoFromTelegram(videos[i].FileID)
             select {
             case <-ctx.Done():
