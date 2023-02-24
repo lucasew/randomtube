@@ -26,6 +26,7 @@ func main() {
     host, err := os.Hostname()
     BailOutIfError(err)
     Report("Processo de geração de vídeo iniciado em '%s'. Limite %ds ou %d videos, 0 é sem limite", host, maxSeconds, maxVideos)
+    Report("Tamanho da fila: %d vídeos (%ds)", endpointResult.QueueSize, endpointResult.QueueTime)
     defer CleanupPhase()
     ctx, cancel := context.WithCancel(context.Background())
     AddCleanupHook(cancel)

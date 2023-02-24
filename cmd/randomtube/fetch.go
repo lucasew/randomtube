@@ -16,6 +16,8 @@ type TelegramVideo struct {
 
 type TelegramEndpointData struct {
     Videos []TelegramVideo `json:"videos"`
+    QueueSize int
+    QueueTime int
     ReportChatID int64 `json:"reportChatID"`
 }
 
@@ -29,6 +31,10 @@ func FetchTelegramEndpoint() (*TelegramEndpointData, error) {
     err = json.NewDecoder(resp.Body).Decode(&data)
     if err != nil {
         return nil, err
+    }
+    for _, video := range data.Videos {
+        data.QueueSize++
+        data.QueueTime += video.Length
     }
     reportChat = data.ReportChatID
     return &data, nil
