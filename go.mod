@@ -9,7 +9,7 @@ require (
 	github.com/google/uuid v1.6.0
 	golang.org/x/oauth2 v0.30.0
 	google.golang.org/api v0.233.0
-	google.golang.org/grpc v1.72.0
+	google.golang.org/grpc v1.72.1
 )
 
 require (
