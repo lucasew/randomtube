@@ -2,5 +2,28 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "lockFileMaintenance": {
+    "enabled": false,
+    "recreateWhen": "always",
+    "automergeType": "pr",
+    "automerge": true
+  },
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "automerge": true
+    },
+    {
+      "matchPackageNames": [
+        "google.golang.org/api",
+        "google.golang.org/grpc",
+        "github.com/google/uuid",
+        "golang.org/x/oauth2"
+      ],
+      "automerge": true
+    }
   ]
 }
