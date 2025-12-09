@@ -6,7 +6,7 @@ toolchain go1.25.5
 
 require (
 	github.com/google/uuid v1.6.0
-	golang.org/x/oauth2 v0.33.0
+	golang.org/x/oauth2 v0.34.0
 	google.golang.org/api v0.256.0
 )
 
